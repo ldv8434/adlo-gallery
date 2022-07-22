@@ -1,0 +1,34 @@
+body {
+	background-color: #333;
+}
+
+h1 {
+	font: Garamond, serif;
+}
+
+.flex-container {
+	display: flex;
+	flex-flow: wrap;
+  justify-content: space-around;
+  align-items: center;
+}
+
+{
+	Note: img object-fit works best as "cover" for
+		small div height values, and "contain" for larger
+		values.
+}
+.flex-container > div {
+	margin: 1px;
+	padding: 1px;
+	height: 15vh;
+	flex-grow: 1;
+}
+
+img {
+  height: 100%;
+	width: 100%;
+	object-fit: cover;
+	vertical-align: bottom;
+}
+
