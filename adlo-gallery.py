@@ -11,13 +11,35 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # create the main gallery HTML as table and return string
 def create_table_gallery():
-	gallery_string = ""
+	gallery_string = '<table>\n'
 
 	# get list of files in directory
-	path_list = [path for path in listdir(args.input) if isfile(join(args.input,path))]
-	for path in path_list:
+	path_list = [path for path in os.listdir(args.input) if os.path.isfile(os.path.join(args.input,path))]
+	path_list.sort()
+	num = 0
+	while (num < len(path_list)):
+		if (num % args.columns) == 0:
+			if num == 0:
+				gallery_string += '</tr>'
+			gallery_string += '<tr>\n'
+		path = path_list[num]
 		if not args.no_thumbnails:
-			create_thumbnail()
+			create_thumbnail(os.path.join(args.input,path))
+
+		if os.path.exists(os.path.join(args.output,'img',path)) or os.path.islink(os.path.join(args.output,'img',path)):
+			os.remove(os.path.join(args.output,'img',path))
+		os.symlink(os.path.abspath(os.path.join(args.input,path)),os.path.join(args.output,'img',path))
+
+		gallery_string += '<td><a href="./img/' + os.path.basename(path) + '">\n'
+		gallery_string += '<img src="./_thumbnails/' + os.path.basename(path) + '">\n'
+		gallery_string += '</a></td>\n'
+
+		num += 1
+
+	while ((num % args.columns) == 0):
+		gallery_string += "<td></td>"
+
+	gallery_string += "</tr></table>"
 
 	return gallery_string
 
@@ -27,12 +49,13 @@ def create_flexbox_gallery():
 
 	# get list of files in directory
 	path_list = [path for path in os.listdir(args.input) if os.path.isfile(os.path.join(args.input,path))]
+	path_list.sort()
 	for path in path_list:
 		if not args.no_thumbnails:
 			create_thumbnail(os.path.join(args.input,path))
 
 
-		gallery_string += '<div><a href="./' + os.path.basename(path) + '">\n'
+		gallery_string += '<div><a href="./img/' + os.path.basename(path) + '">\n'
 		gallery_string += '<img src="./_thumbnails/' + os.path.basename(path) + '">\n'
 		gallery_string += '</a></div>\n'
 
@@ -55,11 +78,18 @@ def create_thumbnail(path):
 
 
 	if os.path.exists(thumb_path):
+			print('Removing existing thumbnail ' + thumb_path)
 			os.remove(thumb_path)
+
 
 	try:
 		with Image.open(path) as im:
-			im.thumbnail((128,128))
+			if args.thumbnail_quality == 'low':
+				im.thumbnail((128,128))
+			if args.thumbnail_quality == 'med':
+				im.thumbnail((256,256))
+			if args.thumbnail_quality == 'low':
+				im.thumbnail((512,512))
 			im = im.convert('RGB')
 			im.save(thumb_path, "JPEG")
 	except AssertionError:#OSError:
@@ -73,17 +103,24 @@ def main():
 	parser.add_argument('-v', action='store_true', help='Verbose/debug mode')
 	parser.add_argument('-f', action='store_true', help='Use flexbox instead of HTML table')
 	css_default_path = os.path.normpath(os.path.dirname(__file__)+os.path.sep+'style.css')
-	parser.add_argument('-c', default=css_default_path, help='CSS file to use')
+	parser.add_argument('-c','--css', default=css_default_path, help='CSS file to use')
 	template_default_path = os.path.normpath(os.path.dirname(__file__)+os.path.sep+'template.html')
 	parser.add_argument('-t', default=template_default_path, help='Jinja2 HTML template file to use')
 	parser.add_argument('-o', '--output', required=True, help='Output directory to use')
 	parser.add_argument('-i', '--input', required=True, help='Input directory to use')
+	parser.add_argument('--no-symlink', action='store_true', help='Copy files instead of symlinking them')
+
 	#parser.add_argument('--sorting', default='name-asc', choices=['mtime-asc','mtime-desc','name-asc','name-desc'], help='Sorting setting.')
 
-	group = parser.add_argument_group('group')
+	group = parser.add_argument_group('thumbnail options')
 	group.add_argument('--no-thumbnails', action='store_true', help='Disable thumbnail generation and use full-size images.')
 	group.add_argument('--regen-thumbnails', action='store_true', help='Regenerate all thumbnails.')
 	group.add_argument('--thumbnail-quality', default='low', choices=['low','med','high'], help='Thumbnail quality.')
+
+	table_group = parser.add_argument_group('table options')
+	table_group.add_argument('--columns', default=8, help='Columns to use for tables')
+
+
 
 	global args
 	args = parser.parse_args()
@@ -113,6 +150,14 @@ def main():
 	# Load template
 	template = env.get_template(os.path.basename(args.t))
 
+	# Create output directory if it doesn't exist
+	if not os.path.exists(args.output):
+		os.mkdir(args.output)
+
+	# Create image source directory if it doesn't exist
+	if not os.path.exists(os.path.join(args.output,'img')):
+		os.mkdir(os.path.join(args.output,'img'))
+
 	# Create thumbnail directory
 	if not args.no_thumbnails and not os.path.exists(os.path.join(args.output,'_thumbnails')):
 		os.mkdir(os.path.join(args.output,'_thumbnails'))
@@ -121,10 +166,10 @@ def main():
 	if args.f:
 		gallery_string = create_flexbox_gallery()
 	else:
-		gallery_string = create_flexbox_gallery()
+		gallery_string = create_table_gallery()
 
 
-	with open(args.c, 'r') as css_file:
+	with open(args.css, 'r') as css_file:
 		css_string = css_file.read()
 
 	# Print HTML
