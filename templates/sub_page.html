@@ -8,7 +8,44 @@
 	<link href="{{ SITEURL }}/{{ FEED_RSS }}" type="application/atom+xml" rel="alternate" title="{{ SITENAME }} RSS Feed" /-->
 	<!--link rel="icon" type="image/svg+xml" href="/images/lp.svg"-->
 	<style>
-{{ CSS }}
+body {
+	background-color: #888;
+}
+
+h1 {
+	font: Garamond, serif;
+}
+
+.flex-container {
+	display: flex;
+	flex-flow: wrap;
+  justify-content: space-around;
+  align-items: center;
+}
+
+{
+	Note: img object-fit works best as "cover" for
+		small div height values, and "contain" for larger
+		values.
+}
+.flex-container > div {
+	margin: 1px;
+	padding: 1px;
+	height: 15vh;
+	flex-grow: 1;
+}
+
+img {
+	height: 100%;
+	width: 100%;
+	object-fit: cover;
+	vertical-align: bottom;
+}
+
+td img {
+	max-height: 300px;
+}
+
 	</style>
 </head>
 
@@ -18,12 +55,16 @@
 		<h1>
 			Adlo-Gallery
 		</h1>
-		<p>
-			Click on an image's thumbnail to open the full-sized source. 
-		</p>
 	</header>
 
 	<main>
+<a href="../index.html">Go back</a>
+<h2>
+{{ SUB_GALLERY_NAME }}
+</h2>
+<p>
+{{ SUB_GALLERY_DESCRIPTION }}
+</p>
 {{ GALLERY }}
 	</main>
 

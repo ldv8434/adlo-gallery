@@ -10,12 +10,14 @@ from PIL import Image
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # create the main gallery HTML as table and return string
-def create_table_gallery():
+#	input_path: string of location relative to args.input
+def create_table_gallery(args, input_path):
 	gallery_string = '<table>\n'
 
 	# get list of files in directory
-	path_list = [path for path in os.listdir(args.input) if os.path.isfile(os.path.join(args.input,path))]
+	path_list = [path for path in os.listdir(input_path) if os.path.isfile(os.path.join(input_path,path))]
 	path_list.sort()
+
 	num = 0
 	while (num < len(path_list)):
 		if (num % args.columns) == 0:
@@ -26,12 +28,11 @@ def create_table_gallery():
 		if not args.no_thumbnails:
 			create_thumbnail(os.path.join(args.input,path))
 
-		if os.path.exists(os.path.join(args.output,'img',path)) or os.path.islink(os.path.join(args.output,'img',path)):
-			os.remove(os.path.join(args.output,'img',path))
-		os.symlink(os.path.abspath(os.path.join(args.input,path)),os.path.join(args.output,'img',path))
-
 		gallery_string += '<td><a href="./img/' + os.path.basename(path) + '">\n'
-		gallery_string += '<img src="./_thumbnails/' + os.path.basename(path) + '">\n'
+		if not args.no_thumbnails:
+			gallery_string += '<img src="./_thumbnails/' + os.path.basename(path) + '">\n'
+		if not args.no_thumbnails:
+			gallery_string += '<img src="./img/' + os.path.basename(path) + '">\n'
 		gallery_string += '</a></td>\n'
 
 		num += 1
@@ -44,11 +45,12 @@ def create_table_gallery():
 	return gallery_string
 
 # create the main gallery HTML as table and return string
-def create_flexbox_gallery():
+#	input_path: string of location relative to args.input
+def create_flexbox_gallery(args, input_path):
 	gallery_string = '<div class="flex-container">'
 
 	# get list of files in directory
-	path_list = [path for path in os.listdir(args.input) if os.path.isfile(os.path.join(args.input,path))]
+	path_list = [path for path in os.listdir(input_path) if os.path.isfile(os.path.join(input_path,path))]
 	path_list.sort()
 	for path in path_list:
 		if not args.no_thumbnails:
@@ -56,7 +58,10 @@ def create_flexbox_gallery():
 
 
 		gallery_string += '<div><a href="./img/' + os.path.basename(path) + '">\n'
-		gallery_string += '<img src="./_thumbnails/' + os.path.basename(path) + '">\n'
+		if not args.no_thumbnails:
+			gallery_string += '<img src="./_thumbnails/' + os.path.basename(path) + '">\n'
+		if not args.no_thumbnails:
+			gallery_string += '<img src="./img/' + os.path.basename(path) + '">\n'
 		gallery_string += '</a></div>\n'
 
 	# close flex container
@@ -96,6 +101,9 @@ def create_thumbnail(path):
 		logging.error("Error creating thumbnail for " + filename)
 
 	# Debugging option
+
+def create_artist_page(path):
+	pass
 
 def main():
 	# Create argument parser

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Adlo-Gallery</title>
+	<!--link href="{{ SITEURL }}/{{ FEED_ATOM }}" type="application/atom+xml" rel="alternate" title="{{ SITENAME }} ATOM Feed" />
+	<link href="{{ SITEURL }}/{{ FEED_RSS }}" type="application/atom+xml" rel="alternate" title="{{ SITENAME }} RSS Feed" /-->
+	<!--link rel="icon" type="image/svg+xml" href="/images/lp.svg"-->
+	<style>
+body {
+	background-color: #888;
+}
+
+h1 {
+	font: Garamond, serif;
+}
+
+.flex-container {
+	display: flex;
+	flex-flow: wrap;
+  justify-content: space-around;
+  align-items: center;
+}
+
+{
+	Note: img object-fit works best as "cover" for
+		small div height values, and "contain" for larger
+		values.
+}
+.flex-container > div {
+	margin: 1px;
+	padding: 1px;
+	height: 15vh;
+	flex-grow: 1;
+}
+
+img {
+	height: 100%;
+	width: 100%;
+	object-fit: cover;
+	vertical-align: bottom;
+}
+
+td img {
+	max-height: 300px;
+}
+
+	</style>
+</head>
+
+
+<body>
+
+<header>
+	<h1>
+		Adlo-Gallery
+	</h1>
+</header>
+
+<main>
+	{% if COLLECTIONS %}
+	<h2>
+		Collections
+	</h2>
+	<ul>
+	{% for COLLECTION in COLLECTIONS %}
+		<li><a href="{{COLLECTION.folder}}/index.html">{{COLLECTION.title}}</a> — {{COLLECTION.description}}</li>
+	{% endfor %}
+	</ul>
+	{% endif %}
+	<h2>
+		Sample images
+	</h2>
+	<p>
+	Here you can find a sample set of images.
+	</p>
+	{{ GALLERY }}
+</main>
+
+<footer>
+	<!-- Generated using https://github.com/ldv8434/adlo-gallery -->
+	Generated using <a href="https://github.com/ldv8434/adlo-gallery">adlo-gallery</a>.
+</footer>
+
+</body>
+</html>
