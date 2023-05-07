@@ -1,5 +1,7 @@
 # Adlo Gallery
 
+**This tool is not yet ready for general use.**
+
 Dead-simple web gallery creator. Turn a folder (or folder structure) of images into a simple gallery.
 
 Generates a single web page with an HTML table or flexbox grid of thumbnail images. Clicking on an image will open the full version of the image.
